@@ -60,7 +60,13 @@ variable "role_name" {
 ###############################################################################
 # lambda
 
-variable "udemy_function_name" {
+variable "api_function_name" {
+  description = "Describtive name of the AWS lambda function"
+  type        = string
+  default     = "unknow_name"
+}
+
+variable "scraper_function_name" {
   description = "Describtive name of the AWS lambda function"
   type        = string
   default     = "unknow_name"
@@ -90,10 +96,35 @@ variable "function_memory_size" {
   default     = 256
 }
 
+variable "lambda_tracing_config" {
+  default = "Active"
+}
+
 variable "lambda_logging_retention" {
   description = "Maximum number of days to keep the lambda function logs"
   type        = number
   default     = 1
+}
+
+###############################################################################
+# ecr
+
+variable "api_image_version" {
+  description = "Docker image version of a lambda function"
+  type        = string
+  default     = 0.1
+}
+
+variable "scraper_image_version" {
+  description = "Docker image version of a lambda function"
+  type        = string
+  default     = 0.1
+}
+
+variable "certificate_image_version" {
+  description = "Docker image version of a lambda function"
+  type        = string
+  default     = 0.1
 }
 
 ###############################################################################
