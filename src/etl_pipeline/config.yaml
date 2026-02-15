@@ -1,0 +1,6 @@
+database:
+  table_name: "UdemyCourse"
+bucket:
+  name: "udemy-wqxe"
+  prefix_certificate: "certificate-upstream-zone"
+  prefix_api: "api-upstream-zone"
