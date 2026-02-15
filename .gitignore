@@ -1,3 +1,7 @@
+# project
+/src/etl_pipeline/data
+*.duckdb
+
 # Python-generated files
 __pycache__/
 *.py[oc]
