@@ -3,16 +3,17 @@
 ###############################################################################
 
 locals {
-  ecr_login_url         = data.aws_ecr_authorization_token.this.proxy_endpoint
-  ecr_repo_url          = aws_ecr_repository.lambda.repository_url
-  ecr_token             = data.aws_ecr_authorization_token.this
-  image_tag_api         = "${local.ecr_repo_url}:${var.api_function_name}-${var.api_image_version}"
-  image_tag_scraper     = "${local.ecr_repo_url}:${var.scraper_function_name}-${var.scraper_image_version}"
+  ecr_login_url = data.aws_ecr_authorization_token.this.proxy_endpoint
+  ecr_repo_url  = aws_ecr_repository.lambda.repository_url
+  ecr_token     = data.aws_ecr_authorization_token.this
+  image_tag_api = "${local.ecr_repo_url}:${var.api_function_name}-${var.api_image_version}"
+  #image_tag_scraper     = "${local.ecr_repo_url}:${var.scraper_function_name}-${var.scraper_image_version}"
   image_tag_certificate = "${local.ecr_repo_url}:${var.certificate_function_name}-${var.certificate_image_version}"
 }
 
-#####
+###############################################################################
 # ecr
+
 resource "aws_ecr_repository" "lambda" {
   name                 = "${var.project}-lambda"
   image_tag_mutability = "MUTABLE"
@@ -46,23 +47,6 @@ resource "terraform_data" "build_api" {
   }
 }
 
-resource "terraform_data" "build_scraper" {
-  depends_on = [terraform_data.login]
-
-  provisioner "local-exec" {
-    command = <<EOT
-      docker build \
-        -t ${local.image_tag_scraper} \
-        -f ./docker/Dockerfile \
-        --build-arg PYTHON_VERSION=${var.python_version} \
-        --build-arg AUTHOR="dataengineer24" \
-        --build-arg DESCRIPTION="AWS lambda function to scrape udemy course data" \
-        --build-arg SRC_PATH="./src/web_scraper" \
-        ..
-    EOT
-  }
-}
-
 resource "terraform_data" "build_certificate" {
   depends_on = [terraform_data.login]
 
@@ -70,7 +54,7 @@ resource "terraform_data" "build_certificate" {
     command = <<EOT
       docker build \
         -t ${local.image_tag_certificate} \
-        -f ./docker/Dockerfile.ubuntu \
+        -f ./docker/Dockerfile.tesseract \
         --build-arg PYTHON_VERSION=${var.python_version} \
         --build-arg AUTHOR="dataengineer24" \
         --build-arg DESCRIPTION="AWS lambda function to scrape certificate data" \
@@ -91,21 +75,6 @@ resource "terraform_data" "push_api" {
   provisioner "local-exec" {
     command = <<EOT
       docker image push ${local.image_tag_api}
-    EOT
-  }
-}
-
-resource "terraform_data" "push_scraper" {
-  depends_on = [
-    terraform_data.login,
-    terraform_data.build_scraper
-  ]
-  triggers_replace = [
-    var.scraper_image_version
-  ]
-  provisioner "local-exec" {
-    command = <<EOT
-      docker image push ${local.image_tag_scraper}
     EOT
   }
 }

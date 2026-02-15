@@ -8,10 +8,6 @@ terraform {
       source  = "hashicorp/aws"
       version = "6.23.0"
     }
-    # docker = {
-    #   source  = "kreuzwerker/docker"
-    #   version = "3.6.2"
-    # }
     random = {
       source  = "hashicorp/random"
       version = "3.7.2"
@@ -36,11 +32,3 @@ provider "aws" {
     }
   }
 }
-
-# provider "docker" {
-#   registry_auth {
-#     address  = data.aws_ecr_authorization_token.token.proxy_endpoint
-#     username = data.aws_ecr_authorization_token.token.user_name
-#     password = data.aws_ecr_authorization_token.token.password
-#   }
-# }

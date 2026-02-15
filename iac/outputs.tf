@@ -30,7 +30,7 @@ output "certificate_function_name" {
   value       = var.certificate_function_name
 }
 
-output "scraper_function_name" {
-  description = "Name of the Lambda function."
-  value       = var.scraper_function_name
-}
+# output "scraper_function_name" {
+#   description = "Name of the Lambda function."
+#   value       = var.scraper_function_name
+# }
