@@ -117,12 +117,15 @@ def lambda_handler(event: LambdaEvent, context: object) -> None:
     logger.info("Start lambda")
 
     course_id = event["course_id"]
+    certificate_id = event["certificate_id"]
     bucket = event["bucket"]
     prefix = event["prefix"]
 
     try:
         url = f"{BASE_URL}/courses/{course_id}/"
         data = fetch_api(url)
+        data["certificate_id"] = certificate_id
+        data["created"] = current_date()
         key = make_s3_key(prefix, course_id)
         upload_to_s3(bucket, key, data)
 

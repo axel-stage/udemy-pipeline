@@ -1,6 +1,11 @@
 # little helpers
 terraform output
 
+# S3
+aws s3 ls
+aws s3 ls udemy-xhmz/
+aws s3 ls udemy-xhmz/api-upstream-zone/
+
 # certificate
 #############
 # copy files
