@@ -1,24 +1,84 @@
 import yaml
+import logging
+from pathlib import Path
 
+from config import CONFIG_PATH, DATA_PATH, WAREHOUSE_PATH, OWNER_STATS_QUERY, OWNER_STATS_MAPPING
 from etl.extract import extract_data
 from etl.transform import transform_data
 from etl.load import load_data
 
-with open("src/etl_pipeline/config.yaml", "r") as file:
-    config = yaml.safe_load(file)
 
-WAREHOUSE_PATH = "src/etl_pipeline/warehouse.duckdb"
-TABLE_NAME = config["database"]["table_name"]
-BUCKET_NAME = config["bucket"]["name"]
-CERT_PREFIX = config["bucket"]["prefix_certificate"]
-API_PREFIX = config["bucket"]["prefix_api"]
+logger = logging.getLogger(__name__)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+)
 
-def run_pipeline():
-    extract_data(BUCKET_NAME, API_PREFIX, "api")
-    extract_data(BUCKET_NAME, CERT_PREFIX, "certificate")
-    transform_data(WAREHOUSE_PATH)
-    query = "select * from gold.owner_stats;"
-    load_data(WAREHOUSE_PATH, TABLE_NAME, query)
+
+def load_config(config_path: str) -> dict:
+    """
+    Load pipeline configuration from YAML.
+
+    Returns:
+        Parsed configuration dictionary.
+
+    Raises:
+        FileNotFoundError: If config file is missing.
+    """
+    config_file = Path(config_path)
+
+    with open(config_file, "r") as file:
+        return yaml.safe_load(file)
+
+
+def run_pipeline() -> None:
+    """
+    Execute the full ELT pipeline:
+
+    1. Extract raw JSON from S3
+    2. Transform data in DuckDB (Bronze → Silver → Gold)
+    3. Load Gold aggregates into DynamoDB
+
+    This function acts as the main orchestration entry point
+    (e.g. Lambda handler or CLI runner).
+
+    Raises:
+        Exception: Propagates any pipeline failure.
+    """
+    logger.info("Pipeline started")
+
+    config = load_config(CONFIG_PATH)
+    TABLE_NAME = config["database"]["table_name"]
+    BUCKET_NAME = config["bucket"]["name"]
+    CERT_PREFIX = config["bucket"]["prefix_certificate"]
+    API_PREFIX = config["bucket"]["prefix_api"]
+
+    try:
+        # Extract
+        extract_data(BUCKET_NAME, API_PREFIX, DATA_PATH, "api")
+        extract_data(BUCKET_NAME, CERT_PREFIX, DATA_PATH, "certificate")
+
+        # Transform
+        transform_data(WAREHOUSE_PATH)
+
+        # Load
+        load_data(
+            WAREHOUSE_PATH,
+            TABLE_NAME,
+            OWNER_STATS_QUERY,
+            OWNER_STATS_MAPPING,
+        )
+
+        logger.info("Loaded data into DynamoDB table: %s", TABLE_NAME)
+
+    except Exception:
+        logger.exception("Pipeline failed")
+        raise
+
+    finally:
+        logger.info("Pipeline finished")
+        logger.info("#" * 80)
+
 
 if __name__ == "__main__":
     run_pipeline()
