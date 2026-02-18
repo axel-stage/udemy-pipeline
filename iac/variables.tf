@@ -67,13 +67,13 @@ variable "api_function_name" {
   default     = "unknow_name"
 }
 
-variable "scraper_function_name" {
+variable "certificate_function_name" {
   description = "Describtive name of the AWS lambda function"
   type        = string
   default     = "unknow_name"
 }
 
-variable "certificate_function_name" {
+variable "pipeline_function_name" {
   description = "Describtive name of the AWS lambda function"
   type        = string
   default     = "unknow_name"
@@ -116,13 +116,13 @@ variable "api_image_version" {
   default     = 0.1
 }
 
-variable "scraper_image_version" {
+variable "certificate_image_version" {
   description = "Docker image version of a lambda function"
   type        = string
   default     = 0.1
 }
 
-variable "certificate_image_version" {
+variable "pipeline_image_version" {
   description = "Docker image version of a lambda function"
   type        = string
   default     = 0.1

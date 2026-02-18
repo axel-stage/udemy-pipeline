@@ -17,9 +17,12 @@ resource "aws_cloudwatch_log_group" "lambda_api" {
   name              = "/aws/lambda/${var.api_function_name}"
   retention_in_days = var.lambda_logging_retention
 }
-
 resource "aws_cloudwatch_log_group" "lambda_certificate" {
   name              = "/aws/lambda/${var.certificate_function_name}"
+  retention_in_days = var.lambda_logging_retention
+}
+resource "aws_cloudwatch_log_group" "lambda_pipeline" {
+  name              = "/aws/lambda/${var.pipeline_function_name}"
   retention_in_days = var.lambda_logging_retention
 }
 
@@ -64,6 +67,36 @@ resource "aws_lambda_function" "certificate" {
   role          = aws_iam_role.lambda_role.arn
   package_type  = "Image"
   image_uri     = "${aws_ecr_repository.lambda.repository_url}:${var.certificate_function_name}-${var.certificate_image_version}"
+  memory_size   = var.function_memory_size
+  timeout       = var.function_timeout
+  architectures = ["x86_64"]
+
+  logging_config {
+    log_format            = "JSON"
+    application_log_level = "INFO"
+    system_log_level      = "WARN"
+  }
+  environment {
+    variables = {
+      TEST_VAR = "test"
+    }
+  }
+  tracing_config {
+    mode = var.lambda_tracing_config
+  }
+}
+
+resource "aws_lambda_function" "pipeline" {
+  depends_on = [
+    aws_cloudwatch_log_group.lambda_pipeline,
+    terraform_data.push_pipeline
+  ]
+
+  description   = "Handler for Lambda function with ETL pipeline integration"
+  function_name = var.pipeline_function_name
+  role          = aws_iam_role.lambda_role.arn
+  package_type  = "Image"
+  image_uri     = "${aws_ecr_repository.lambda.repository_url}:${var.pipeline_function_name}-${var.pipeline_image_version}"
   memory_size   = var.function_memory_size
   timeout       = var.function_timeout
   architectures = ["x86_64"]

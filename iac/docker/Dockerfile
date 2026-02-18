@@ -30,4 +30,4 @@ COPY --from=builder ${LAMBDA_TASK_ROOT} ${LAMBDA_TASK_ROOT}
 
 COPY ${SRC_PATH} ${LAMBDA_TASK_ROOT}
 
-CMD ["main.lambda_handler"]
+CMD ["lambda_function.lambda_handler"]

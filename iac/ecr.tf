@@ -7,8 +7,8 @@ locals {
   ecr_repo_url  = aws_ecr_repository.lambda.repository_url
   ecr_token     = data.aws_ecr_authorization_token.this
   image_tag_api = "${local.ecr_repo_url}:${var.api_function_name}-${var.api_image_version}"
-  #image_tag_scraper     = "${local.ecr_repo_url}:${var.scraper_function_name}-${var.scraper_image_version}"
   image_tag_certificate = "${local.ecr_repo_url}:${var.certificate_function_name}-${var.certificate_image_version}"
+  image_tag_pipeline    = "${local.ecr_repo_url}:${var.pipeline_function_name}-${var.pipeline_image_version}"
 }
 
 ###############################################################################
@@ -64,6 +64,23 @@ resource "terraform_data" "build_certificate" {
   }
 }
 
+resource "terraform_data" "build_pipeline" {
+  depends_on = [terraform_data.login]
+
+  provisioner "local-exec" {
+    command = <<EOT
+      docker build \
+        -t ${local.image_tag_pipeline} \
+        -f ./docker/Dockerfile \
+        --build-arg PYTHON_VERSION=${var.python_version} \
+        --build-arg AUTHOR="dataengineer24" \
+        --build-arg DESCRIPTION="AWS lambda function for ETL pipeline" \
+        --build-arg SRC_PATH="./src/etl_pipeline" \
+        ..
+    EOT
+  }
+}
+
 resource "terraform_data" "push_api" {
   depends_on = [
     terraform_data.login,
@@ -90,6 +107,21 @@ resource "terraform_data" "push_certificate" {
   provisioner "local-exec" {
     command = <<EOT
       docker image push ${local.image_tag_certificate}
+    EOT
+  }
+}
+
+resource "terraform_data" "push_pipeline" {
+  depends_on = [
+    terraform_data.login,
+    terraform_data.build_pipeline
+  ]
+  triggers_replace = [
+    var.pipeline_image_version
+  ]
+  provisioner "local-exec" {
+    command = <<EOT
+      docker image push ${local.image_tag_pipeline}
     EOT
   }
 }
