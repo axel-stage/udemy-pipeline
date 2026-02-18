@@ -2,7 +2,7 @@ import yaml
 import logging
 from pathlib import Path
 
-from config import CONFIG_PATH, DATA_PATH, WAREHOUSE_PATH, OWNER_STATS_QUERY, OWNER_STATS_MAPPING
+from config import CONFIG_PATH, DATA_PATH, WAREHOUSE_PATH, OWNER_STATS_QUERY, OWNER_STATS_MAPPING, INSTRUCTOR_TOP_5_QUERY, INSTRUCTOR_TOP_5_MAPPING
 from etl.extract import extract_data
 from etl.transform import transform_data
 from etl.load import load_data
@@ -56,10 +56,13 @@ def run_pipeline() -> None:
     try:
         # Extract
         extract_data(BUCKET_NAME, API_PREFIX, DATA_PATH, "api")
+        logger.info("Extracted data from: %s/%s", BUCKET_NAME, API_PREFIX)
         extract_data(BUCKET_NAME, CERT_PREFIX, DATA_PATH, "certificate")
+        logger.info("Extracted data from: %s/%s", BUCKET_NAME, CERT_PREFIX)
 
         # Transform
         transform_data(WAREHOUSE_PATH)
+        logger.info("Transformed data with local warehouse: %s", WAREHOUSE_PATH)
 
         # Load
         load_data(
@@ -68,8 +71,14 @@ def run_pipeline() -> None:
             OWNER_STATS_QUERY,
             OWNER_STATS_MAPPING,
         )
-
-        logger.info("Loaded data into DynamoDB table: %s", TABLE_NAME)
+        logger.info("Loaded owner data into DynamoDB table: %s", TABLE_NAME)
+        load_data(
+            WAREHOUSE_PATH,
+            TABLE_NAME,
+            INSTRUCTOR_TOP_5_QUERY,
+            INSTRUCTOR_TOP_5_MAPPING,
+        )
+        logger.info("Loaded instructor data into DynamoDB table: %s", TABLE_NAME)
 
     except Exception:
         logger.exception("Pipeline failed")
@@ -77,7 +86,6 @@ def run_pipeline() -> None:
 
     finally:
         logger.info("Pipeline finished")
-        logger.info("#" * 80)
 
 
 if __name__ == "__main__":

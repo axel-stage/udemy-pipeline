@@ -9,11 +9,11 @@ select
     published_title::varchar as slug,
     url::varchar as url,
     case
-    when '|' in instructor_title then string_split(instructor_title, '|')[1]
-    when '(' in instructor_title then string_split(instructor_title, '(')[1]
-    when ',' in instructor_title then string_split(instructor_title, ',')[1]
-    when 'by' in instructor_title then string_split(instructor_title, 'by')[2]
-    else instructor_title end as instructor,
+    when '|' in instructor_title then trim(string_split(instructor_title, '|')[1])
+    when '(' in instructor_title then trim(string_split(instructor_title, '(')[1])
+    when ',' in instructor_title then trim(string_split(instructor_title, ',')[1])
+    when 'by' in instructor_title then trim(string_split(instructor_title, 'by')[2])
+    else trim(instructor_title) end as instructor,
     language::varchar as language,
     is_practice_test_course::boolean as is_practice_test,
     is_paid::boolean as is_paid
