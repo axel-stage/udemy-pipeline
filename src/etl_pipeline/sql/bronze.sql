@@ -16,10 +16,12 @@ select
     is_practice_test_course,
     is_paid,
     created as _created_at
-from read_json("src/etl_pipeline/data/api-*.json");
+from read_json("/tmp/api-*.json");
+-- from read_json("src/etl_pipeline/data/api-*.json");
 
 create or replace table bronze.certificate
 as
 select
     *
-from read_json("src/etl_pipeline/data/certificate-*.json");
+from read_json("/tmp/certificate-*.json");
+-- from read_json("src/etl_pipeline/data/certificate-*.json");

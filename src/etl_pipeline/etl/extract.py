@@ -62,7 +62,7 @@ def write_json_files(bucket_name: str, keys: list[str], data_path: str, file_nam
         None
     """
     data_dir = Path(data_path)
-    data_dir.mkdir(parents=True, exist_ok=True)
+    #data_dir.mkdir(parents=True, exist_ok=True)
 
     for counter, key in enumerate(keys):
         json_obj = get_object_from_bucket(bucket_name, key)

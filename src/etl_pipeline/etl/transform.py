@@ -43,4 +43,4 @@ def transform_data(db_path: str) -> None:
     """
     with duckdb.connect(db_path) as con:
         for medallion in ("bronze", "silver", "gold"):
-            run_sql(con, f"src/etl_pipeline/sql/{medallion}.sql")
+            run_sql(con, f"sql/{medallion}.sql")
