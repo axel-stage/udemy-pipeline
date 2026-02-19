@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CERTIFICATE_PATH="/mnt/c/Users/axels/Proton Drive/dataengineer24/My files/IT-Freelancer/udemy"
+source .env
 
 echo
 echo "###################### Programm start ######################"
@@ -18,7 +18,7 @@ fi
 
 # load map from file
 stored_certificates=()
-readarray -t files < <(ls "${CERTIFICATE_PATH}")
+readarray -t files < <(ls "${LOCAL_CERTIFICATE_PATH}")
 for file in ${files[@]}
 do
     if [[ ${file} == *".jpg" ]]
