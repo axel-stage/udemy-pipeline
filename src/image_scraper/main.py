@@ -5,8 +5,13 @@ import boto3
 from botocore.exceptions import ClientError
 from image_scraper import UdemyCertificateScraper
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+)
+
 
 def list_jpg_keys_in_bucket(bucket: str) -> list[str]:
     """Get a list of keys which end with 'jpg' in an S3 bucket."""
@@ -19,31 +24,31 @@ def list_jpg_keys_in_bucket(bucket: str) -> list[str]:
     return keys
 
 def lambda_handler(event, context):
-    max_retries = 0
     logger.info(f"{"#" * 80}")
     logger.info("Start processing...")
 
     s3_client = boto3.client('s3')
     bucket_name: str = event.get("bucket_name", "")
-    upstream_prefix: str = event.get("upstream_prefix", "")
-    local_path: str = event.get("local_path", "")
+    certificate_prefix: str = event.get("certificate_prefix", "")
+    #local_path: str = event.get("local_path", "")
 
     jpg_keys = list_jpg_keys_in_bucket(bucket_name)
     logger.info(f"jpg keys: {jpg_keys}")
     for jpg_key in jpg_keys:
         logger.info(f"start download {jpg_key}")
-        downstream_file_name = local_path + jpg_key.split('/')[1]
+        file_name = jpg_key.split('/')[1]
+        file_path = f"/tmp/{file_name}"
         try:
             s3_client.download_file(
                 Bucket=bucket_name,
                 Key=jpg_key,
-                Filename=downstream_file_name
+                Filename=file_path
             )
         except ClientError as error:
             logging.error(error)
 
-        logger.info(f"start parsing: {downstream_file_name}")
-        certificate = UdemyCertificateScraper(downstream_file_name)
+        logger.info(f"start parsing: {file_path}")
+        certificate = UdemyCertificateScraper(file_path)
         certificate.parse_image_text()
         data = {
             "owner": certificate.get_owner(),
@@ -57,8 +62,7 @@ def lambda_handler(event, context):
         }
         logger.info(f"parsed data: {data}")
 
-        upstream_file_name = f'certificate_{data["certificate_id"]}_{data["created"]}.json'
-        key =  upstream_prefix + upstream_file_name
+        key = f'{certificate_prefix}certificate_{data["certificate_id"]}_{data["created"]}.json'
         try:
             s3_client.put_object(
                 Body=json.dumps(data).encode('utf-8'),

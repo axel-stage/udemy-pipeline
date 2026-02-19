@@ -46,7 +46,7 @@ def get_object_from_bucket(bucket_name: str, key: str) -> str:
     return response["Body"].read().decode("utf-8")
 
 
-def write_json_files(bucket_name: str, keys: list[str], data_path: str, file_name: str) -> None:
+def write_json_files(bucket_name: str, keys: list[str], storage_path: str, file_name: str) -> None:
     """
     Write S3 JSON objects to local files.
 
@@ -61,19 +61,14 @@ def write_json_files(bucket_name: str, keys: list[str], data_path: str, file_nam
     Returns:
         None
     """
-    data_dir = Path(data_path)
-    #data_dir.mkdir(parents=True, exist_ok=True)
-
     for counter, key in enumerate(keys):
         json_obj = get_object_from_bucket(bucket_name, key)
-
-        output_path = data_dir / f"{file_name}-{counter}.json"
-
-        with open(output_path, "w", encoding="utf-8") as file:
+        file_path = f"{storage_path}/{file_name}-{counter}.json"
+        with open(file_path, "w", encoding="utf-8") as file:
             file.write(json_obj)
 
 
-def extract_data(bucket_name: str, prefix: str, data_path: str, file_name: str) -> None:
+def extract_data(bucket_name: str, prefix: str, storage_path: str, file_name: str) -> None:
     """
     Extract JSON files from S3 and land them locally for Bronze ingestion.
 
@@ -94,4 +89,4 @@ def extract_data(bucket_name: str, prefix: str, data_path: str, file_name: str) 
             f"No valid S3 objects found in bucket '{bucket_name}' with prefix '{prefix}'"
         )
 
-    write_json_files(bucket_name, keys, data_path, file_name)
+    write_json_files(bucket_name, keys, storage_path, file_name)

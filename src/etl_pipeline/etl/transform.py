@@ -28,7 +28,7 @@ def run_sql(con: duckdb.DuckDBPyConnection, path: str) -> None:
     con.execute(sql_file.read_text())
 
 
-def transform_data(db_path: str) -> None:
+def transform_data(db_path: str, root_dir: str) -> None:
     """
     Execute the full medallion transformation pipeline.
 
@@ -43,4 +43,4 @@ def transform_data(db_path: str) -> None:
     """
     with duckdb.connect(db_path) as con:
         for medallion in ("bronze", "silver", "gold"):
-            run_sql(con, f"sql/{medallion}.sql")
+            run_sql(con, f"{root_dir}/sql/{medallion}.sql")

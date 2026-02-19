@@ -1,8 +1,17 @@
-import yaml
+import os
 import logging
-from pathlib import Path
+from dotenv import load_dotenv
 
-from config import CONFIG_PATH, DATA_PATH, WAREHOUSE_PATH, OWNER_STATS_QUERY, OWNER_STATS_MAPPING, INSTRUCTOR_TOP_5_QUERY, INSTRUCTOR_TOP_5_MAPPING
+from config import (
+    ROOT_DIR,
+    MODULE_DIR,
+    STORAGE_DIR,
+    WAREHOUSE_PATH,
+    OWNER_STATS_QUERY,
+    OWNER_STATS_MAPPING,
+    INSTRUCTOR_TOP_5_QUERY,
+    INSTRUCTOR_TOP_5_MAPPING
+)
 from etl.extract import extract_data
 from etl.transform import transform_data
 from etl.load import load_data
@@ -14,21 +23,11 @@ logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
 )
 
-
-def load_config(config_path: str) -> dict:
-    """
-    Load pipeline configuration from YAML.
-
-    Returns:
-        Parsed configuration dictionary.
-
-    Raises:
-        FileNotFoundError: If config file is missing.
-    """
-    config_file = Path(config_path)
-
-    with open(config_file, "r") as file:
-        return yaml.safe_load(file)
+load_dotenv(dotenv_path=f"{ROOT_DIR}/.env")
+TABLE_NAME = os.getenv("TABLE_NAME")
+BUCKET_NAME = os.getenv("BUCKET_NAME")
+CERTIFICATE_PREFIX = os.getenv("CERTIFICATE_PREFIX")
+API_PREFIX = os.getenv("API_PREFIX")
 
 
 def run_pipeline() -> None:
@@ -47,21 +46,15 @@ def run_pipeline() -> None:
     """
     logger.info("Pipeline started")
 
-    config = load_config(CONFIG_PATH)
-    TABLE_NAME = config["database"]["table_name"]
-    BUCKET_NAME = config["bucket"]["name"]
-    CERT_PREFIX = config["bucket"]["prefix_certificate"]
-    API_PREFIX = config["bucket"]["prefix_api"]
-
     try:
         # Extract
-        extract_data(BUCKET_NAME, API_PREFIX, DATA_PATH, "api")
+        extract_data(BUCKET_NAME, API_PREFIX, STORAGE_DIR, "api")
         logger.info("Extracted data from: %s/%s", BUCKET_NAME, API_PREFIX)
-        extract_data(BUCKET_NAME, CERT_PREFIX, DATA_PATH, "certificate")
-        logger.info("Extracted data from: %s/%s", BUCKET_NAME, CERT_PREFIX)
+        extract_data(BUCKET_NAME, CERTIFICATE_PREFIX, STORAGE_DIR, "certificate")
+        logger.info("Extracted data from: %s/%s", BUCKET_NAME, CERTIFICATE_PREFIX)
 
         # Transform
-        transform_data(WAREHOUSE_PATH)
+        transform_data(WAREHOUSE_PATH, MODULE_DIR)
         logger.info("Transformed data with local warehouse: %s", WAREHOUSE_PATH)
 
         # Load

@@ -1,8 +1,10 @@
 from decimal import Decimal
+from pathlib import Path
 
-CONFIG_PATH = "src/etl_pipeline/config.yaml"
-DATA_PATH = "src/etl_pipeline/data"
-WAREHOUSE_PATH = "src/etl_pipeline/warehouse.duckdb"
+ROOT_DIR = Path(__file__).parent.parent.parent
+MODULE_DIR = Path(__file__).parent
+STORAGE_DIR = "/tmp"
+WAREHOUSE_PATH = "/tmp/warehouse.duckdb"
 OWNER_STATS_QUERY = "select * from gold.owner_stats;"
 OWNER_STATS_MAPPING = {
     "PartitionKey": lambda item: f"owner#{item['owner']}",

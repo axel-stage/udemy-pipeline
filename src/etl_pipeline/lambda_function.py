@@ -5,7 +5,15 @@ AWS Lambda function to run the ETL pipeline
 import logging
 from typing import TypedDict
 
-from config_docker import WAREHOUSE_PATH, OWNER_STATS_QUERY, OWNER_STATS_MAPPING, INSTRUCTOR_TOP_5_QUERY, INSTRUCTOR_TOP_5_MAPPING
+from config import (
+    MODULE_DIR,
+    STORAGE_DIR,
+    WAREHOUSE_PATH,
+    OWNER_STATS_QUERY,
+    OWNER_STATS_MAPPING,
+    INSTRUCTOR_TOP_5_QUERY,
+    INSTRUCTOR_TOP_5_MAPPING
+)
 from etl.extract import extract_data
 from etl.transform import transform_data
 from etl.load import load_data
@@ -47,19 +55,18 @@ def lambda_handler(event: LambdaEvent, context: object) -> None:
     BUCKET_NAME = event["bucket_name"]
     CERT_PREFIX = event["prefix_certificate"]
     API_PREFIX = event["prefix_api"]
-    STORAGE_PATH = event["storage_path"]
 
     logger.info("Pipeline started")
 
     try:
         # Extract
-        extract_data(BUCKET_NAME, API_PREFIX, STORAGE_PATH, "api")
+        extract_data(BUCKET_NAME, API_PREFIX, STORAGE_DIR, "api")
         logger.info("Extracted data from: %s/%s", BUCKET_NAME, API_PREFIX)
-        extract_data(BUCKET_NAME, CERT_PREFIX, STORAGE_PATH, "certificate")
+        extract_data(BUCKET_NAME, CERT_PREFIX, STORAGE_DIR, "certificate")
         logger.info("Extracted data from: %s/%s", BUCKET_NAME, CERT_PREFIX)
 
         # Transform
-        transform_data(WAREHOUSE_PATH)
+        transform_data(WAREHOUSE_PATH, MODULE_DIR)
         logger.info("Transformed data with local warehouse: %s", WAREHOUSE_PATH)
 
         # Load

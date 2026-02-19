@@ -1,6 +1,0 @@
-database:
-  table_name: "UdemyCourse"
-bucket:
-  name: "udemy-kebw"
-  prefix_certificate: "certificate-upstream-zone"
-  prefix_api: "api-upstream-zone"

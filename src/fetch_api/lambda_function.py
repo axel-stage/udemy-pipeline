@@ -16,8 +16,11 @@ BASE_URL = "https://www.udemy.com/api-2.0"
 HEADERS = {"Accept": "application/json"}
 TIMEOUT = 10
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+)
 
 s3 = boto3.client("s3")
 
@@ -28,12 +31,12 @@ class LambdaEvent(TypedDict):
 
     Attributes:
         course_id: course identifier
-        bucket: Target S3 bucket for storing results.
-        prefix: S3 key prefix (folder path).
+        bucket_name: Target S3 bucket_name for storing results.
+        api_prefix: S3 key api_prefix (folder path).
     """
     course_id: str
-    bucket: str
-    prefix: str
+    bucket_name: str
+    api_prefix: str
 
 
 def current_date() -> str:
@@ -46,21 +49,21 @@ def current_date() -> str:
     return time.strftime("%Y-%m-%d")
 
 
-def make_s3_key(prefix: str, course_id: str) -> str:
+def make_s3_key(api_prefix: str, course_id: str) -> str:
     """
     Generate the S3 object key for the payload.
 
     Format:
-        {prefix}/api_{course_id}_{current_date}.json
+        {api_prefix}/api_{course_id}_{current_date}.json
 
     Args:
-        prefix: S3 prefix (folder path).
+        api_prefix: S3 api_prefix (folder path).
         course_id: Course Identifier
 
     Returns:
         Fully qualified S3 object key.
     """
-    return f'{prefix}api_{course_id}_{current_date()}.json'
+    return f'{api_prefix}api_{course_id}_{current_date()}.json'
 
 
 # side effect
@@ -79,20 +82,20 @@ def fetch_api(url: str) -> dict[str, Any]:
     return response.json()
 
 
-def upload_to_s3(bucket: str, key: str, payload: dict[str, Any]) -> None:
+def upload_to_s3(bucket_name: str, key: str, payload: dict[str, Any]) -> None:
     """
     Upload payload as JSON to S3.
 
     Args:
-        bucket: Target S3 bucket.
-        key: Object key within the bucket.
+        bucket_name: Target S3 bucket_name.
+        key: Object key within the bucket_name.
         payload: Serialized course payload.
 
     Raises:
         ClientError: If S3 upload fails.
     """
     s3.put_object(
-        Bucket=bucket,
+        Bucket=bucket_name,
         Key=key,
         Body=json.dumps(payload).encode(),
     )
@@ -118,19 +121,19 @@ def lambda_handler(event: LambdaEvent, context: object) -> None:
 
     course_id = event["course_id"]
     certificate_id = event["certificate_id"]
-    bucket = event["bucket"]
-    prefix = event["prefix"]
+    bucket_name = event["bucket_name"]
+    api_prefix = event["api_prefix"]
 
     try:
         url = f"{BASE_URL}/courses/{course_id}/"
         data = fetch_api(url)
         data["certificate_id"] = certificate_id
         data["created"] = current_date()
-        key = make_s3_key(prefix, course_id)
-        upload_to_s3(bucket, key, data)
+        key = make_s3_key(api_prefix, course_id)
+        upload_to_s3(bucket_name, key, data)
 
         logger.info("Fetch data: %s", data)
-        logger.info("Uploaded to s3://%s/%s", bucket, key)
+        logger.info("Uploaded to s3://%s/%s", bucket_name, key)
 
     except (requests.RequestException, ClientError) as error:
         logger.error("Processing failed: %s", error)
