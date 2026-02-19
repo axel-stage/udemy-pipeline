@@ -45,8 +45,8 @@ variable "bucket_versioning" {
 }
 
 variable "bucket_zones" {
-  description = "Bucket prefix set"
-  type        = set(string)
+  description = "Bucket prefix list"
+  type        = list(string)
 }
 
 ###############################################################################
