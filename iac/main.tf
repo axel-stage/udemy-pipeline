@@ -117,11 +117,12 @@ resource "aws_lambda_function" "pipeline" {
 }
 
 resource "local_file" "env" {
-  content = templatefile("env.tftpl", {
+  content = templatefile("template/env.tftpl", {
     table_name = aws_dynamodb_table.udemy_course.name
     bucket_name = aws_s3_bucket.udemy.id
-    bucket_prefix_certificate = element(var.bucket_zones, 1)
-    bucket_prefix_api = var.bucket_zones[2]
+    prefix_landing_certificate = var.prefix_landing_certificate
+    prefix_upstream_certificate = var.prefix_upstream_certificate
+    prefix_upstream_api = var.prefix_upstream_api
     api_function_name = var.api_function_name
     certificate_function_name = var.certificate_function_name
     pipeline_function_name = var.pipeline_function_name

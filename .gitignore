@@ -3,6 +3,7 @@
 /bin/certificate_link_store*
 /src/etl_pipeline/data
 *.duckdb
+.env
 
 # Python-generated files
 __pycache__/

@@ -1,4 +1,4 @@
-# Udemy Scraper Project
+# Udemy Data Pipeline Project
 ## Overview
 A cloud-native, serverless application designed to scrape metadata and certificate text from Udemy courses, transform the information into structured JSON objects, and store them in AWS cloud storage. This project demonstrates web scraping, OCR processing, serverless architecture, IaC with Terraform and CI/CD Pipeline.
 ## Table of Contents
@@ -11,19 +11,19 @@ A cloud-native, serverless application designed to scrape metadata and certifica
 1. [Areas for Improvement](#areas-for-improvement)
 1. [License](#license)
 ## Features
-- **Automated Udemy Course Scraping**  
+- **Automated Udemy Course Scraping**
   Extracts course statistics and metadata from all owned Udemy courses.
-- **Certificate OCR Extraction**  
+- **Certificate OCR Extraction**
   Uses Tesseract OCR to read and convert text from Udemy certificate images.
-- **JSON Data Generation**  
+- **JSON Data Generation**
   Produces structured, machine-readable JSON objects for both courses and certificates.
-- **Serverless Architecture**  
+- **Serverless Architecture**
   Runs as a containerized AWS Lambda function for high scalability and low cost.
-- **CI/CD Pipeline with AWS ECR**  
+- **CI/CD Pipeline with AWS ECR**
   Automates building, containerizing, and pushing images to Amazon ECR for continuous deployment to AWS Lambda.
-- **Infrastructure as Code (IaC)**  
+- **Infrastructure as Code (IaC)**
   Uses Terraform to provision all resources: Lambda, ECR, S3, IAM roles, etc.
-- **AWS Cloud Storage Integration**  
+- **AWS Cloud Storage Integration**
   Automatically uploads scraped JSON files to an S3 bucket.
 ## Quick Start
 **try in <5 minutes**

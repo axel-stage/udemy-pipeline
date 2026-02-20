@@ -14,7 +14,7 @@ OWNER_STATS_MAPPING = {
     "TotalPaidCourses": lambda item: int(item["total_paid_courses"]),
     "TotalPracticeTests": lambda item: int(item["total_practice_tests"]),
 }
-INSTRUCTOR_TOP_5_QUERY = "select * from gold.instructor_top_5;"
+INSTRUCTOR_TOP_5_QUERY = "select * from gold.instructor limit 5;"
 INSTRUCTOR_TOP_5_MAPPING = {
     "PartitionKey": lambda item: f"instructor#{item['instructor']}",
     "SortKey": lambda item: f"instructor#{item['instructor']}",

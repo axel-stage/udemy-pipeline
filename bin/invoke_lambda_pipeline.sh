@@ -8,9 +8,9 @@ aws lambda invoke \
   --invocation-type RequestResponse \
   --cli-binary-format raw-in-base64-out \
   --payload '{
-    "table_name": "'${TABLE_NAME}'",
-    "bucket_name": "'${BUCKET_NAME}'",
-    "prefix_certificate": "'${CERTIFICATE_PREFIX}'",
-    "prefix_api": "'${API_PREFIX}'"
+    "TABLE_NAME": "'${TABLE_NAME}'",
+    "BUCKET_NAME": "'${BUCKET_NAME}'",
+    "PREFIX_UPSTREAM_CERTIFICATE": "'${PREFIX_UPSTREAM_CERTIFICATE}'",
+    "PREFIX_UPSTREAM_API": "'${PREFIX_UPSTREAM_API}'"
     }' \
   response.json && cat response.json && rm response.json

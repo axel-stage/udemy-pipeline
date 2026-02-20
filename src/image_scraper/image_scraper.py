@@ -1,6 +1,4 @@
 import re
-import os
-import time
 
 from PIL import Image
 import pytesseract
@@ -16,7 +14,6 @@ class UdemyCertificateScraper:
     def parse_image_text(self, config = ('-l eng --oem 1 --psm 3')) -> str:
         with Image.open(self.image_path) as image:
             self._parsed_text = pytesseract.image_to_string(image, config=config)
-        #print(self._parsed_text)
         return self._parsed_text
 
     def use_regex(self, regex: str) -> str:
@@ -88,25 +85,3 @@ class UdemyCertificateScraper:
             regex = r"udemy(.*)Instructors"
             course = self.use_regex(regex)
         return self.clean_text(course)
-
-if __name__ == "__main__":
-
-    path="/home/xl/projects/udemy_scraper/src/image_scraper/test/"
-    files = os.listdir(path)
-    images = [ path + file for file in files if file.endswith(".jpg") ]
-
-    for image in images:
-
-        certificate = UdemyCertificateScraper(image)
-        certificate.parse_image_text()
-        data = {
-          "owner": certificate.get_owner(),
-          "certificate_id": certificate.get_certificate_id(),
-          "instructors": certificate.get_instructors(),
-          "title": certificate.get_title(),
-          "course_length": certificate.get_course_length(),
-          "course_end": certificate.get_course_end(),
-          "reference_number": certificate.get_reference_number(),
-          "created": str( time.strftime("%Y-%m-%d") ),
-        }
-        print(data)

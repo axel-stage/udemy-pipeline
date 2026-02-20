@@ -44,9 +44,19 @@ variable "bucket_versioning" {
   default     = "Disabled"
 }
 
-variable "bucket_zones" {
-  description = "Bucket prefix list"
-  type        = list(string)
+variable "prefix_landing_certificate" {
+  description = "Bucket prefix"
+  type        = string
+}
+
+variable "prefix_upstream_certificate" {
+  description = "Bucket prefix"
+  type        = string
+}
+
+variable "prefix_upstream_api" {
+  description = "Bucket prefix"
+  type        = string
 }
 
 ###############################################################################

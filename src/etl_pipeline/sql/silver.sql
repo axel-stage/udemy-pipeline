@@ -29,7 +29,10 @@ select
     instructors::varchar as certificate_instructor,
     course_length::decimal(10,1) as course_length,
     case
+    when 'Sept.' in course_end
+        then strptime(replace(replace(course_end, 'Sept.', 'Sep'), ', ', ','), '%b %-d,%Y')::date
     when '.' in course_end
-    then strptime(replace(course_end, '.', ''), '%b %-d, %Y')::date
-    else strptime(course_end, '%B %-d, %Y')::date end as course_end
+        then strptime(replace(replace(course_end, '.', ''), ', ', ','), '%b %-d,%Y')::date
+    else
+        strptime(replace(course_end, ', ', ','), '%B %-d,%Y')::date end as course_end
 from bronze.certificate;

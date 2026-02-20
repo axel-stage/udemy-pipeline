@@ -26,8 +26,10 @@ logging.basicConfig(
 load_dotenv(dotenv_path=f"{ROOT_DIR}/.env")
 TABLE_NAME = os.getenv("TABLE_NAME")
 BUCKET_NAME = os.getenv("BUCKET_NAME")
-CERTIFICATE_PREFIX = os.getenv("CERTIFICATE_PREFIX")
-API_PREFIX = os.getenv("API_PREFIX")
+PREFIX_UPSTREAM_CERTIFICATE = os.getenv("PREFIX_UPSTREAM_CERTIFICATE")
+PREFIX_UPSTREAM_API = os.getenv("PREFIX_UPSTREAM_API")
+FILE_NAME_API = "api"
+FILE_NAME_CERTIFICATE = "certificate"
 
 
 def run_pipeline() -> None:
@@ -48,10 +50,10 @@ def run_pipeline() -> None:
 
     try:
         # Extract
-        extract_data(BUCKET_NAME, API_PREFIX, STORAGE_DIR, "api")
-        logger.info("Extracted data from: %s/%s", BUCKET_NAME, API_PREFIX)
-        extract_data(BUCKET_NAME, CERTIFICATE_PREFIX, STORAGE_DIR, "certificate")
-        logger.info("Extracted data from: %s/%s", BUCKET_NAME, CERTIFICATE_PREFIX)
+        extract_data(BUCKET_NAME, PREFIX_UPSTREAM_API, STORAGE_DIR, FILE_NAME_API)
+        logger.info("Extracted data from: %s/%s", BUCKET_NAME, PREFIX_UPSTREAM_API)
+        extract_data(BUCKET_NAME, PREFIX_UPSTREAM_CERTIFICATE, STORAGE_DIR, FILE_NAME_CERTIFICATE)
+        logger.info("Extracted data from: %s/%s", BUCKET_NAME, PREFIX_UPSTREAM_CERTIFICATE)
 
         # Transform
         transform_data(WAREHOUSE_PATH, MODULE_DIR)

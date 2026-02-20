@@ -15,7 +15,8 @@ select
     locale.locale as language,
     is_practice_test_course,
     is_paid,
-    created as _created_at
+    created_at,
+    source_system
 from read_json("/tmp/api-*.json");
 
 create or replace table bronze.certificate

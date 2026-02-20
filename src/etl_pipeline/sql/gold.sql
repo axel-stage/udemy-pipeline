@@ -27,12 +27,11 @@ from gold.fact_udemy_course
 group by grouping sets ((owner),(owner, year))
 order by year;
 
-create or replace table gold.instructor_top_5 as
+create or replace table gold.instructor as
 select
     instructor,
     count(*) as total_courses,
     sum(course_length) as total_course_length
 from gold.fact_udemy_course
 group by instructor
-order by total_course_length desc
-limit 5;
+order by total_course_length desc;

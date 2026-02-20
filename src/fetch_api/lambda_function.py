@@ -3,7 +3,7 @@ AWS Lambda function to request the Udemy API for course data and persist it to S
 """
 
 import json
-import time
+from datetime import datetime, timezone
 import logging
 from typing import Any, TypedDict
 
@@ -30,13 +30,15 @@ class LambdaEvent(TypedDict):
     Schema for incoming Lambda events.
 
     Attributes:
-        course_id: course identifier
-        bucket_name: Target S3 bucket_name for storing results.
-        api_prefix: S3 key api_prefix (folder path).
+        COURSE_SLUG: course identifier
+        CERTIFICATE_ID: certificate identifier
+        BUCKET_NAME: Target S3 bucket name for storing results.
+        PREFIX_UPSTREAM_API: S3 key (folder path).
     """
-    course_id: str
-    bucket_name: str
-    api_prefix: str
+    COURSE_SLUG: str
+    CERTIFICATE_ID: str
+    BUCKET_NAME: str
+    PREFIX_UPSTREAM_API: str
 
 
 def current_date() -> str:
@@ -46,24 +48,26 @@ def current_date() -> str:
     Returns:
         Current UTC date as a string.
     """
-    return time.strftime("%Y-%m-%d")
+    now = datetime.now(timezone.utc)
+    today = now.date().isoformat()
+    return today
 
 
-def make_s3_key(api_prefix: str, course_id: str) -> str:
+def make_s3_key(prefix_upstream_api: str, course_id: str) -> str:
     """
     Generate the S3 object key for the payload.
 
     Format:
-        {api_prefix}/api_{course_id}_{current_date}.json
+        {prefix_upstream_api}/api_{course_id}_{current_date}.json
 
     Args:
-        api_prefix: S3 api_prefix (folder path).
+        prefix_upstream_api: S3 prefix (folder path).
         course_id: Course Identifier
 
     Returns:
         Fully qualified S3 object key.
     """
-    return f'{api_prefix}api_{course_id}_{current_date()}.json'
+    return f'{prefix_upstream_api}/api_{course_id}_{current_date()}.json'
 
 
 # side effect
@@ -119,21 +123,22 @@ def lambda_handler(event: LambdaEvent, context: object) -> None:
     """
     logger.info("Start lambda")
 
-    course_id = event["course_id"]
-    certificate_id = event["certificate_id"]
-    bucket_name = event["bucket_name"]
-    api_prefix = event["api_prefix"]
+    COURSE_SLUG = event["COURSE_SLUG"]
+    CERTIFICATE_ID = event["CERTIFICATE_ID"]
+    BUCKET_NAME = event["BUCKET_NAME"]
+    PREFIX_UPSTREAM_API = event["PREFIX_UPSTREAM_API"]
 
     try:
-        url = f"{BASE_URL}/courses/{course_id}/"
+        url = f"{BASE_URL}/courses/{COURSE_SLUG}/"
         data = fetch_api(url)
-        data["certificate_id"] = certificate_id
-        data["created"] = current_date()
-        key = make_s3_key(api_prefix, course_id)
-        upload_to_s3(bucket_name, key, data)
+        data["certificate_id"] = CERTIFICATE_ID
+        data["source_system"] = "lambda_api"
+        data["created_at"] = datetime.now(timezone.utc).isoformat()
+        key = make_s3_key(PREFIX_UPSTREAM_API, COURSE_SLUG)
+        upload_to_s3(BUCKET_NAME, key, data)
 
         logger.info("Fetch data: %s", data)
-        logger.info("Uploaded to s3://%s/%s", bucket_name, key)
+        logger.info("Uploaded to s3://%s/%s", BUCKET_NAME, key)
 
     except (requests.RequestException, ClientError) as error:
         logger.error("Processing failed: %s", error)

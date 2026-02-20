@@ -15,9 +15,9 @@ resource "aws_s3_bucket_versioning" "bucket_versioning" {
 }
 
 resource "aws_s3_object" "bucket_zones" {
-  for_each = toset(var.bucket_zones)
+  for_each = toset([var.prefix_landing_certificate, var.prefix_upstream_certificate, var.prefix_upstream_api])
   bucket   = aws_s3_bucket.udemy.id
-  key      = each.key
+  key      = "${each.key}/"
   source   = "/dev/null"
 
   depends_on = [

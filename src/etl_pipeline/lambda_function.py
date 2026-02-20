@@ -51,19 +51,21 @@ def lambda_handler(event: LambdaEvent, context: object) -> None:
         Exception: Propagates any ETL pipeline failure.
     """
 
-    TABLE_NAME = event["table_name"]
-    BUCKET_NAME = event["bucket_name"]
-    CERT_PREFIX = event["prefix_certificate"]
-    API_PREFIX = event["prefix_api"]
+    TABLE_NAME = event["TABLE_NAME"]
+    BUCKET_NAME = event["BUCKET_NAME"]
+    PREFIX_UPSTREAM_CERTIFICATE = event["PREFIX_UPSTREAM_CERTIFICATE"]
+    PREFIX_UPSTREAM_API = event["PREFIX_UPSTREAM_API"]
+    FILE_NAME_API = "api"
+    FILE_NAME_CERTIFICATE = "certificate"
 
     logger.info("Pipeline started")
 
     try:
         # Extract
-        extract_data(BUCKET_NAME, API_PREFIX, STORAGE_DIR, "api")
-        logger.info("Extracted data from: %s/%s", BUCKET_NAME, API_PREFIX)
-        extract_data(BUCKET_NAME, CERT_PREFIX, STORAGE_DIR, "certificate")
-        logger.info("Extracted data from: %s/%s", BUCKET_NAME, CERT_PREFIX)
+        extract_data(BUCKET_NAME, PREFIX_UPSTREAM_API, STORAGE_DIR, FILE_NAME_API)
+        logger.info("Extracted data from: %s/%s", BUCKET_NAME, PREFIX_UPSTREAM_API)
+        extract_data(BUCKET_NAME, PREFIX_UPSTREAM_CERTIFICATE,  STORAGE_DIR, FILE_NAME_CERTIFICATE )
+        logger.info("Extracted data from: %s/%s", BUCKET_NAME, PREFIX_UPSTREAM_CERTIFICATE)
 
         # Transform
         transform_data(WAREHOUSE_PATH, MODULE_DIR)
