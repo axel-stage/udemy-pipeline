@@ -29,9 +29,10 @@ order by year;
 
 create or replace table gold.instructor as
 select
+    owner,
     instructor,
     count(*) as total_courses,
     sum(course_length) as total_course_length
 from gold.fact_udemy_course
-group by instructor
+group by owner, instructor
 order by total_course_length desc;
