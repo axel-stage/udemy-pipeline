@@ -32,6 +32,26 @@ class LambdaEvent(TypedDict):
     PREFIX_LANDING_CERTIFICATE: str
     PREFIX_UPSTREAM_CERTIFICATE: str
 
+def get_certificate_id(key: str) -> str:
+    """
+    Extract certificate_id from AWS S3 key
+
+    Args:
+        key: AWS S3 key
+
+    Raises:
+        ValueError
+    """
+    if not isinstance(key, str):
+        raise ValueError("Key must be a str")
+
+    if "/" in key:
+        key = key.split("/")[-1]
+
+    if ".jpg" in key:
+        key = key[:-4]
+
+    return key
 
 def lambda_handler(event: LambdaEvent, context: object) -> None:
     """
@@ -46,7 +66,7 @@ def lambda_handler(event: LambdaEvent, context: object) -> None:
         Exception: Any error
     """
 
-    CERTIFICATE_ID: str = event["CERTIFICATE_ID"]
+    CERTIFICATE_ID: str = get_certificate_id(event["CERTIFICATE_ID"])
     BUCKET_NAME: str = event["BUCKET_NAME"]
     PREFIX_LANDING_CERTIFICATE: str = event["PREFIX_LANDING_CERTIFICATE"]
     PREFIX_UPSTREAM_CERTIFICATE: str = event["PREFIX_UPSTREAM_CERTIFICATE"]
@@ -63,8 +83,6 @@ def lambda_handler(event: LambdaEvent, context: object) -> None:
         logger.info(f"Download: {download_key}")
         certificate = UdemyCertificateScraper(local_file_name)
         certificate.parse_image_text()
-        now = datetime.now(timezone.utc)
-        today = now.date().isoformat()
         data = {
             "owner": certificate.get_owner(),
             "certificate_id": certificate.get_certificate_id(),
@@ -73,18 +91,18 @@ def lambda_handler(event: LambdaEvent, context: object) -> None:
             "course_length": certificate.get_course_length(),
             "course_end": certificate.get_course_end(),
             "reference_number": certificate.get_reference_number(),
-            "created_at": now.isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
             "source_system": "lambda_certificate",
         }
         logger.info(f"parsed data: {data}")
-        output_key = f'{PREFIX_UPSTREAM_CERTIFICATE}/certificate_{CERTIFICATE_ID}_{today}.json'
+        upstream_key = f'{PREFIX_UPSTREAM_CERTIFICATE}/certificate_{CERTIFICATE_ID}.json'
         s3_client.put_object(
             Bucket=BUCKET_NAME,
-            Key=output_key,
+            Key=upstream_key,
             Body=json.dumps(data).encode('utf-8'),
             ContentType="application/json"
         )
-        logger.info("Uploading processed certificate to s3://%s/%s", BUCKET_NAME, output_key)
+        logger.info("Uploading processed certificate to s3://%s/%s", BUCKET_NAME, upstream_key)
 
     except ClientError:
         logger.exception("S3 operation failed")

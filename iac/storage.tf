@@ -2,6 +2,17 @@
 # module: root
 ###############################################################################
 
+resource "random_string" "naming" {
+  length  = 4
+  upper   = false
+  numeric = false
+  special = false
+}
+
+locals {
+  suffix = random_string.naming.result
+}
+
 resource "aws_s3_bucket" "udemy" {
   bucket        = "${var.bucket_name}-${local.suffix}"
   force_destroy = var.force_destroy_bucket
@@ -23,4 +34,9 @@ resource "aws_s3_object" "bucket_zones" {
   depends_on = [
     aws_s3_bucket.udemy
   ]
+}
+
+resource "aws_s3_bucket_notification" "enable_eventbridge" {
+  bucket      = aws_s3_bucket.udemy.id
+  eventbridge = true
 }

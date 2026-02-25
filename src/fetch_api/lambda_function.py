@@ -41,24 +41,12 @@ class LambdaEvent(TypedDict):
     PREFIX_UPSTREAM_API: str
 
 
-def current_date() -> str:
-    """
-    Return the current date in ISO format (YYYY-MM-DD).
-
-    Returns:
-        Current UTC date as a string.
-    """
-    now = datetime.now(timezone.utc)
-    today = now.date().isoformat()
-    return today
-
-
 def make_s3_key(prefix_upstream_api: str, course_id: str) -> str:
     """
     Generate the S3 object key for the payload.
 
     Format:
-        {prefix_upstream_api}/api_{course_id}_{current_date}.json
+        {prefix_upstream_api}/api_{course_id}.json
 
     Args:
         prefix_upstream_api: S3 prefix (folder path).
@@ -67,7 +55,7 @@ def make_s3_key(prefix_upstream_api: str, course_id: str) -> str:
     Returns:
         Fully qualified S3 object key.
     """
-    return f'{prefix_upstream_api}/api_{course_id}_{current_date()}.json'
+    return f'{prefix_upstream_api}/api_{course_id}.json'
 
 
 # side effect

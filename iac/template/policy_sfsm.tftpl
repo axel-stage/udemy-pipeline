@@ -1,0 +1,39 @@
+{
+  "Version": "2012-10-17",
+  "Id": "sfsm-policy",
+  "Statement": [
+    {
+      "Sid": "DistributedMapChildExecutions",
+      "Effect": "Allow",
+      "Action": "states:StartExecution",
+      "Resource": "*"
+    },
+    {
+      "Sid": "LambdaInvoke",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:InvokeFunction"
+      ],
+      "Resource": [
+        "${lambda_api}",
+        "${lambda_certificate}",
+        "${lambda_pipeline}"
+      ]
+    },
+    {
+      "Sid": "CloudWatchAccess",
+      "Effect": "Allow",
+      "Action": [
+        "cloudwatch:PutMetricData",
+        "logs:*"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ReadBatchFromS3",
+      "Effect": "Allow",
+      "Action": "s3:GetObject",
+      "Resource": "${bucket_arn}/*"
+    }
+  ]
+}

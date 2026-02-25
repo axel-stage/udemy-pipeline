@@ -2,30 +2,6 @@
 # module: root
 ###############################################################################
 
-resource "random_string" "naming" {
-  length  = 4
-  upper   = false
-  numeric = false
-  special = false
-}
-
-locals {
-  suffix = random_string.naming.result
-}
-
-resource "aws_cloudwatch_log_group" "lambda_api" {
-  name              = "/aws/lambda/${var.api_function_name}"
-  retention_in_days = var.lambda_logging_retention
-}
-resource "aws_cloudwatch_log_group" "lambda_certificate" {
-  name              = "/aws/lambda/${var.certificate_function_name}"
-  retention_in_days = var.lambda_logging_retention
-}
-resource "aws_cloudwatch_log_group" "lambda_pipeline" {
-  name              = "/aws/lambda/${var.pipeline_function_name}"
-  retention_in_days = var.lambda_logging_retention
-}
-
 resource "aws_lambda_function" "api" {
   depends_on = [
     aws_cloudwatch_log_group.lambda_api,
@@ -34,7 +10,7 @@ resource "aws_lambda_function" "api" {
 
   description   = "Handler for Lambda function with fetch api integration"
   function_name = var.api_function_name
-  role          = aws_iam_role.lambda_role.arn
+  role          = aws_iam_role.lambda.arn
   package_type  = "Image"
   image_uri     = "${aws_ecr_repository.lambda.repository_url}:${var.api_function_name}-${var.api_image_version}"
   memory_size   = var.function_memory_size
@@ -64,7 +40,7 @@ resource "aws_lambda_function" "certificate" {
 
   description   = "Handler for Lambda function with certificate scraper integration"
   function_name = var.certificate_function_name
-  role          = aws_iam_role.lambda_role.arn
+  role          = aws_iam_role.lambda.arn
   package_type  = "Image"
   image_uri     = "${aws_ecr_repository.lambda.repository_url}:${var.certificate_function_name}-${var.certificate_image_version}"
   memory_size   = var.function_memory_size
@@ -94,7 +70,7 @@ resource "aws_lambda_function" "pipeline" {
 
   description   = "Handler for Lambda function with ETL pipeline integration"
   function_name = var.pipeline_function_name
-  role          = aws_iam_role.lambda_role.arn
+  role          = aws_iam_role.lambda.arn
   package_type  = "Image"
   image_uri     = "${aws_ecr_repository.lambda.repository_url}:${var.pipeline_function_name}-${var.pipeline_image_version}"
   memory_size   = var.function_memory_size
@@ -114,18 +90,4 @@ resource "aws_lambda_function" "pipeline" {
   tracing_config {
     mode = var.lambda_tracing_config
   }
-}
-
-resource "local_file" "env" {
-  content = templatefile("template/env.tftpl", {
-    table_name = aws_dynamodb_table.udemy_course.name
-    bucket_name = aws_s3_bucket.udemy.id
-    prefix_landing_certificate = var.prefix_landing_certificate
-    prefix_upstream_certificate = var.prefix_upstream_certificate
-    prefix_upstream_api = var.prefix_upstream_api
-    api_function_name = var.api_function_name
-    certificate_function_name = var.certificate_function_name
-    pipeline_function_name = var.pipeline_function_name
-  })
-  filename = "../${path.module}/.env"
 }

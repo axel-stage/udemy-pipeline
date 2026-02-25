@@ -139,4 +139,12 @@ variable "pipeline_image_version" {
 }
 
 ###############################################################################
+# step functions
+
+variable "state_machine_name" {
+  description = "Name of the step function state machine"
+  type        = string
+}
+
+###############################################################################
 # secrets

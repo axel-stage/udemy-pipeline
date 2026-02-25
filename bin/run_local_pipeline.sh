@@ -20,6 +20,8 @@ do
     fi
 done
 
+# aws s3 cp "${LOCAL_CERTIFICATE_PATH}/UC-064cb579-163d-4b6c-a4c9-5491e91a71fa.jpg" s3://${BUCKET_NAME}/${PREFIX_LANDING_CERTIFICATE}/UC-064cb579-163d-4b6c-a4c9-5491e91a71fa.jpg
+
 # invoke lambda certificate
 aws s3 ls ${BUCKET_NAME}/${PREFIX_LANDING_CERTIFICATE}/
 

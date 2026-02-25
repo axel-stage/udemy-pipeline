@@ -15,9 +15,14 @@ output "bucket_id" {
   value       = aws_s3_bucket.udemy.id
 }
 
-output "role_arn" {
+output "lambda_role_arn" {
   description = "Lambda role arn"
-  value       = aws_iam_role.lambda_role.arn
+  value       = aws_iam_role.lambda.arn
+}
+
+output "sfsm_role_arn" {
+  description = "Lambda role arn"
+  value       = aws_iam_role.sfsm.arn
 }
 
 output "api_function_name" {

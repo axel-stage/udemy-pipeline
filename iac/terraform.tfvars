@@ -18,3 +18,4 @@ function_timeout          = 180
 function_memory_size      = 256
 python_version            = "3.13"
 lambda_logging_retention  = 1
+state_machine_name        = "udemy-state-machine"
