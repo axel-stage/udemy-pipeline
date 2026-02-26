@@ -1,30 +1,137 @@
 # Udemy Data Pipeline Project
 ## Overview
-A cloud-native, serverless application designed to scrape metadata and certificate text from Udemy courses, transform the information into structured JSON objects, and store them in AWS cloud storage. This project demonstrates web scraping, OCR processing, serverless architecture, IaC with Terraform and CI/CD Pipeline.
+Cloud-native data pipeline that extracts Udemy certificate data using OCR,
+enriches it via APIs, and transforms it into analytics-ready datasets using a
+serverless AWS architecture.
+
+✅ Serverless AWS Architecture  
+✅ Medallion ELT Pipeline  
+✅ Terraform IaC + CI/CD  
+
 ## Table of Contents
 1. [Features](#features)
+1. [Data Architecture](#data-architecture)
+1. [Devops](#devops)
+1. [Tech Stack](#tech-stack)
 1. [Quick Start](#quick-start)
-1. [Business Requirements](#business-requirements)
-1. [Functional Requirements](#functional-requirements)
-1. [Non-Functional Requirements](#non-functional-requirements)
+1. [Result](#result)
 1. [Lessons Learned](#lessons-learned)
 1. [Areas for Improvement](#areas-for-improvement)
 1. [License](#license)
+
 ## Features
-- **Automated Udemy Course Scraping**
-  Extracts course statistics and metadata from all owned Udemy courses.
-- **Certificate OCR Extraction**
-  Uses Tesseract OCR to read and convert text from Udemy certificate images.
-- **JSON Data Generation**
-  Produces structured, machine-readable JSON objects for both courses and certificates.
-- **Serverless Architecture**
-  Runs as a containerized AWS Lambda function for high scalability and low cost.
-- **CI/CD Pipeline with AWS ECR**
-  Automates building, containerizing, and pushing images to Amazon ECR for continuous deployment to AWS Lambda.
-- **Infrastructure as Code (IaC)**
-  Uses Terraform to provision all resources: Lambda, ECR, S3, IAM roles, etc.
-- **AWS Cloud Storage Integration**
-  Automatically uploads scraped JSON files to an S3 bucket.
+### Serverless Architecture
+Designed for high scalability and cost efficiency. Deployed on AWS:
+- AWS Lambda
+- AWS Step Functions
+- Amazon S3
+- Amazon DynamoDB
+- Amazon EventBridge
+- Amazon ECR
+
+### Real-World Data
+- Extracts text from Udemy certificate images
+- Retrieves additional metadata via public API
+
+### ETL Data Pipeline
+- Medallion architecture implementation
+- SQL-based transformations powered by DuckDB
+- Configuration-driven and idempotent design
+
+### Infrastructure as Code (IaC)
+All infrastructure is provisioned using Terraform, enabling:
+- Automated deployments
+- Version-controlled infrastructure
+
+### CI/CD Pipeline
+Automated build and deployment workflow:
+- Lambda functions containerized with Docker
+- Images pushed to ECR
+
+## Data Architecture
+![Data Architecture](doc/data_architecture.png)
+
+### Design Principles
+- Serverless architecture for high scalability and low cost
+- IaC methodology for state management and version control
+- CI/CD pipeline
+- Deployment on AWS
+- Testing DuckDB
+
+###   Data Flow (Simplified)
+![Data Flow](doc/data_flow.png)
+
+### Data Ingestion
+#### Image Scraping
+- Extract text from my Udemy certificate images
+- Use Tesseract OCR library for image scraping
+- Generate a data object for each certificate
+- Store each data object in JSON format in S3
+
+#### API Calling
+- Calls external APIs using requests
+- Retrieves owned course metadata
+- Stores course datasets as JSON in S3
+
+### Orchestration
+The pipeline uses Step Functions to orchestrate distributed batch processing.
+
+### ETL Pipeline
+The project implements a **Bronze → Silver → Gold** data model.
+
+| Layer      | Purpose                         |
+| ---------- | ------------------------------- |
+| **Bronze** | Raw JSON ingestion from S3      |
+| **Silver** | Cleaned & standardized datasets |
+| **Gold**   | Analytics-ready aggregates      |
+
+Transformations are executed using **DuckDB SQL**, enabling fast analytical processing without managing dedicated infrastructure.
+
+Pipeline characteristics:
+- Configuration-driven
+- Idempotent
+- Extensible
+- Type-safe
+
+## Devops
+### Cloud Deployment
+- AWS as cloud provider
+- Terraform-managed infrastructure
+- Serverless Lambda execution model
+
+Required Terraform providers:
+- aws
+- docker
+- random
+
+### CI/CD Workflow
+1. Build Docker image
+1. Push the Docker image to Amazon Elastic Container Registry (ECR)
+1. Deploy containerized Lambda automatically
+
+## Tech Stack
+| Category           | Technology       |
+| :----------------- | :--------------- |
+| Language           | Python           |
+|                    | SQL              |
+|                    | Bash             |
+| AWS                | AWS SDK (boto3)  |
+|                    | Lambda           |
+|                    | Step Functions   |
+|                    | DynamoDB         |
+|                    | ECR              |
+|                    | EventBridge      |
+|                    | S3               |
+| Devops             | Docker Engine    |
+|                    | Terraform        |
+| Data Processing    | DuckDB           |
+|                    | Pandas           |
+|                    | Tesseract OCR    |
+|                    | pytesseract      |
+| Tooling            | UV               |
+|                    | Git / GitHub              |
+**Table 1:** Technology Stack
+
 ## Quick Start
 **try in <5 minutes**
 ### Prerequisites
@@ -34,11 +141,11 @@ A cloud-native, serverless application designed to scrape metadata and certifica
 ### Install
 Clone the repository:
 ```bash
-git clone https://github.com/axel-stage/udemy-scraper
+git clone https://github.com/axel-stage/udemy-pipeline
 ```
 Navigate to the project's iac directory:
 ```bash
-cd udemy-scraper/iac
+cd udemy-pipeline/iac
 ```
 Change the provider setup in iac/providors.tf:
 ```hcl
@@ -51,15 +158,10 @@ provider "aws" {
   }
 }
 ```
-
 Use Terraform to deploy infrastructure on AWS:
 ```bash
 terraform init
-```
-```bash
 terraform plan
-```
-```bash
 terraform apply
 ```
 ### Run
@@ -70,78 +172,19 @@ Invoke lambda functions:
 ```bash
 ../bin/invoke_lambda_certificate.sh
 ```
-### Result
-Parsed data from a certificate:
-```json
-{
-    "owner": "My name",
-    "certificate_id": "UC-0f533ce1-a75f-4696-8507-7a2...",
-    "instructors": "James Spurin (Docker Captain / CNCF Ambassador / Kubestronaut), Divelnto Training",
-    "title": "Kubernetes Introduction - Docker, Kubernetes + Hands On Labs",
-    "course_length": "4",
-    "course_end": "July 3, 2025",
-    "reference_number": "0004",
-    "created": "2025-12-10"
-}
-```
+## Result
+...
 
-Parsed data from course web page:
-```json
-{
-    "url": "https://www.udemy.com/course/python-3-deep-dive-part-1/",
-    "slug": "python-3-deep-dive-part-1",
-    "title": "Python 3: Deep Dive (Part 1 - Functional)",
-    "headline": "Variables, Functions and Functional Programming, Closures, Decorators, Modules and Packages",
-    "instructors": ["Dr. Fred Baptiste"],
-    "topics": ["Development", "Programming Languages", "Python"],
-    "students_num": "69,520",
-    "rating": "4.8",
-    "language": "English",
-    "created": "2025-12-10"
-}
-```
-## Business Requirements
-### 1. Web Scraping
-- Use a web scraping library.
-- Scrape statistics and metadata from each Udemy course owned by the user.
-- Generate a structured data object for each course.
-- Store each data object as a JSON file in cloud storage.
-### 2. Image Scraping
-- Use an OCR library.
-- Extract text from Udemy certificate images.
-- Generate a structured data object for each certificate.
-- Store each data object as a JSON file in cloud storage
-## Functional Requirements
-### Development
-- Use **GitHub** as the Version Control System.
-- Use **Python** as the primary programming language.
-- Use **Tesseract OCR** for image scraping.
-- Use **BeautifulSoup** for web scraping.
-- Required libraries:
-  - **UV** – Python package manager
-  - **BeautifulSoup** – Web scraping
-  - **Pytesseract** – Python wrapper for Tesseract
-  - **boto3** – AWS SDK
-### Deployment
-- Use **AWS** as the cloud service provider.
-- Use **Terraform** for Infrastructure as Code (IaC)
-- Required providers:
-  - aws
-  - docker
-  - random
-- Build the application as a **serverless AWS Lambda** function.
-- CI/CD pipeline:
-  - Containerize the application using **Docker**.
-  - Push the Docker image to **Amazon Elastic Container Registry (ECR)**.
-## Non-Functional Requirements
-- Design with Serverless architecture for high scalability and low cost.
-- Built using IaC methodology for state management and version control.
-- Fully automated CI/CD Pipeline.
 ## Lessons Learned
-- It was a nightmare to install tesseract on a amazon linux 2023 container. As workaround, I had to use a ubuntu container and awslambdaric library instead.
-- Used uv as package manager the first time in a project and I really enjoyed to learn it, especially the speed and the integration with AWS lambda is great.
+- Installing Tesseract OCR inside Amazon Linux 2023 Lambda containers was challenging. A Ubuntu-based container with awslambdaric provided a stable workaround.
+- First usage of uv significantly improved my workflow. I like it.
+- DuckDB is a great tool. Easy to learn and works well in Lambda. Can replace pandas.
+- Step Functions are hard to learn. Amazon States languages is deeply nested and gets complex very quick. Not sure to use it again.
+- Tried web scraping for the project and total underestimated the challenges it comes with
 ## Areas for Improvement
-- Install tesseract on a amazon linux 2023 container
+- Install Tesseract OCR on a amazon linux 2023 container
+- Remote Terraform state management (S3 + DynamoDB locking)
+- Observability & monitoring with CloudWatch dashboards
 ## License
 This project is licensed under the MIT license.
 See [LICENSE](LICENSE) for more information.
