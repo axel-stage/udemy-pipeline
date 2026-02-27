@@ -66,7 +66,7 @@ Automated build and deployment workflow:
 - Store each data object in JSON format in S3
 
 #### API Calling
-- Calls external APIs using requests
+- Calls public API using requests
 - Retrieves owned course metadata
 - Stores course datasets as JSON in S3
 
