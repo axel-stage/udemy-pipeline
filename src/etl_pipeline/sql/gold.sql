@@ -13,7 +13,7 @@ select
     cour.is_practice_test,
     cour.is_paid
 from silver.certificate as cert
-left outer join silver.course as cour on cert.certificate_id = cour.certificate_id;
+inner join silver.course as cour on cert.certificate_id = cour.certificate_id;
 
 create or replace table gold.owner_stats as
 select
