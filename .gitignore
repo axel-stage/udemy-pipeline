@@ -1,6 +1,7 @@
 # project
 /bin/certificate_link_store
 /bin/certificate_link_store*
+/bin/batch_certificate_link.json
 /src/etl_pipeline/data
 *.duckdb
 .env

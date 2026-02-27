@@ -60,7 +60,6 @@ resource "aws_iam_policy" "sfsm" {
   description = "step function state machine policy"
   policy      = templatefile(
     "template/policy_sfsm.tftpl", {
-      #sfsm_arn    = aws_sfn_state_machine.this.arn
       bucket_arn = aws_s3_bucket.udemy.arn
       lambda_api = aws_lambda_function.api.arn
       lambda_certificate = aws_lambda_function.certificate.arn
