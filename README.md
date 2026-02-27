@@ -1,12 +1,9 @@
 # Udemy Data Pipeline Project
 ## Overview
-Cloud-native data pipeline that extracts Udemy certificate data using OCR,
-enriches it via APIs, and transforms it into analytics-ready datasets using a
-serverless AWS architecture.
-
-✅ Serverless AWS Architecture  
-✅ Medallion ELT Pipeline  
-✅ Terraform IaC + CI/CD  
+End-to-end serverless data pipeline that ingests unstructured Udemy certificate data, performs distributed enrichment and SQL-based ELT transformations, and delivers analytics-ready datasets using AWS-native orchestration.
+- ✅ Serverless AWS Architecture
+- ✅ Medallion ELT Pipeline
+- ✅ Terraform IaC + CI/CD
 
 ## Table of Contents
 1. [Features](#features)
@@ -30,7 +27,7 @@ Designed for high scalability and cost efficiency. Deployed on AWS:
 - Amazon ECR
 
 ### Real-World Data
-- Extracts text from Udemy certificate images
+- Extracts text from Udemy certificate images (unstructured data)
 - Retrieves additional metadata via public API
 
 ### ETL Data Pipeline
@@ -56,7 +53,7 @@ Automated build and deployment workflow:
 - IaC methodology for state management and version control
 - CI/CD pipeline
 - Deployment on AWS
-- Testing DuckDB
+- Test DuckDB in a project
 
 ###   Data Flow (Simplified)
 ![Data Flow](doc/data_flow.png)
@@ -164,23 +161,37 @@ terraform init
 terraform plan
 terraform apply
 ```
-### Run
-Invoke lambda functions:
+Go to project dir:
 ```bash
-../bin/invoke_lambda_udemy.sh https://www.udemy.com/course/python-3-deep-dive-part-1/
+cd ..
 ```
+### Run
+Set local path to udemy certificates files in the .env file.
+```
+LOCAL_CERTIFICATE_PATH="/path/to/udemy/certificates"
+```
+Generate certificate link map.
 ```bash
-../bin/invoke_lambda_certificate.sh
+bash bin/generate_certificate_link_map.sh
+```
+Start the pipeline!
+```bash
+bash bin/trigger_step_function_state_machine.sh
+```
+### Clean
+Destroy all AWS resources.
+```
+terraform destroy
 ```
 ## Result
-...
+My demo dashboad (not included in this repo):
+![Demo Dashboard](doc/demo_dashboard.png)
 
 ## Lessons Learned
 - Installing Tesseract OCR inside Amazon Linux 2023 Lambda containers was challenging. A Ubuntu-based container with awslambdaric provided a stable workaround.
-- First usage of uv significantly improved my workflow. I like it.
-- DuckDB is a great tool. Easy to learn and works well in Lambda. Can replace pandas.
-- Step Functions are hard to learn. Amazon States languages is deeply nested and gets complex very quick. Not sure to use it again.
-- Tried web scraping for the project and total underestimated the challenges it comes with
+- First project usage of uv significantly improved my workflow.
+- Using DuckDB was fun and it works well with Lambda. Can replace pandas for data transformations in future projects.
+- Step Functions are difficult to implement. Amazon States languages generate deeply nested code, which quickly makes the workflow complex.
 ## Areas for Improvement
 - Install Tesseract OCR on a amazon linux 2023 container
 - Remote Terraform state management (S3 + DynamoDB locking)
