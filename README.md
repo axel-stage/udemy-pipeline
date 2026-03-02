@@ -1,6 +1,6 @@
 # Udemy Data Pipeline Project
 ## Overview
-End-to-end serverless data pipeline that ingests unstructured Udemy certificate data, performs distributed enrichment and SQL-based ELT transformations, and delivers analytics-ready datasets using AWS-native orchestration.
+End-to-end serverless data pipeline that ingests unstructured Udemy certificate data, performs parallel batch processing and SQL-based ELT transformations, and delivers analytics-ready datasets using AWS Step Functions orchestration.
 - ✅ Serverless AWS Architecture
 - ✅ Medallion ELT Pipeline
 - ✅ Terraform IaC + CI/CD
